@@ -43,11 +43,6 @@ module.exports = {
         {
           title: `Screenshot ID Game (${game})`,
           image: { url: record.imageUrl },
-          footer: {
-            text: `Disimpan pada ${new Date(
-              record.timestamp
-            ).toLocaleString()}`,
-          },
         },
       ],
     });
