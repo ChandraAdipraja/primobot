@@ -97,28 +97,53 @@ client.once(Events.ClientReady, (c) => {
 
 // Event handler untuk slash command
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+  // 1) Slash command handler
+  if (interaction.isChatInputCommand()) {
+    const command = client.commands.get(interaction.commandName);
 
-  const command = client.commands.get(interaction.commandName);
+    if (!command) {
+      console.error(`Command ${interaction.commandName} tidak ditemukan.`);
+      return;
+    }
 
-  if (!command) {
-    console.error(`Command ${interaction.commandName} tidak ditemukan.`);
+    try {
+      await command.execute(interaction, client);
+    } catch (error) {
+      console.error(error);
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({
+          content: "❌ Terjadi error ketika menjalankan command ini.",
+          ephemeral: true,
+        });
+      } else {
+        await interaction.reply({
+          content: "❌ Terjadi error ketika menjalankan command ini.",
+          ephemeral: true,
+        });
+      }
+    }
     return;
   }
 
-  try {
-    await command.execute(interaction, client);
-  } catch (error) {
-    console.error(error);
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: "❌ Terjadi error ketika menjalankan command ini.",
-        ephemeral: true,
-      });
-    } else {
+  // 2) Button handler
+  if (interaction.isButton()) {
+    if (interaction.customId === "intro_template_button") {
+      const template = [
+        "Here's your intro template, you can copy and edit it:",
+        "",
+        "```txt",
+        "Name / Nickname:",
+        "Age (opsional):",
+        "From:",
+        "Games I play:",
+        "How I found this server:",
+        "Fun fact about me:",
+        "```",
+      ].join("\n");
+
       await interaction.reply({
-        content: "❌ Terjadi error ketika menjalankan command ini.",
-        ephemeral: true,
+        content: template,
+        ephemeral: true, // ⚡ cuma yang klik tombol yang bisa lihat
       });
     }
   }
